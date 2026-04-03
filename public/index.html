@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jira Release Notes — PDF Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <!-- ... existing sidebar ... -->
+  <main class="main">
+    <div id="emptyState" class="empty-state">
+      <div class="empty-icon">📤</div>
+      <h1>Release Notes Creator</h1>
+      <p>Upload an HTML or Markdown file to start editing your release notes.</p>
+    </div>
+
+    <div id="contentArea" class="content-area hidden">
+      <div class="content-topbar">
+        <div class="document-info">
+          <span class="doc-label">Document:</span>
+          <span id="currentFileName" class="doc-name">-</span>
+        </div>
+        <div class="topbar-actions">
+          <button id="clearPreviewBtn" class="btn-ghost">🗑 Reset</button>
+          <button id="downloadPdfBtn" class="btn-primary" disabled>
+            <span class="btn-label">⬇ Download PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-wrapper">
+        <div id="previewContainer" class="preview-container"></div>
+      </div>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
