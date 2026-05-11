@@ -90,8 +90,28 @@ export async function generatePdf(payload) {
   });
 
   if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || 'PDF Generation failed');
+    const contentType = res.headers.get('content-type');
+    let errorMessage = 'PDF Generation failed';
+
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // Fallback if JSON parsing still fails
+        errorMessage = `Server returned ${res.status}: ${res.statusText}`;
+      }
+    } else {
+      // Handle non-JSON error (like HTML from Express or proxy)
+      const text = await res.text();
+      if (res.status === 413) {
+        errorMessage = 'Document is too large for the server to process. Try reducing the logo size or content.';
+      } else {
+        errorMessage = `Server Error (${res.status}): ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`;
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   return res.blob();

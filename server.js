@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const puppeteer = require('puppeteer');
@@ -6,21 +7,35 @@ const path = require('path');
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' })); // Increased limit for large documents/logos
 app.use(express.static(path.join(__dirname, 'dist')));
 
 
 // ─── POST /api/generate-pdf ───────────────────────────────────────────────────
 // Body: { html: string, filename: string }
-app.post('/api/generate-pdf', async (req, res) => {
+app.post('/api/generate-pdf', async (req, res, next) => {
   const { html, filename } = req.body;
+  
+  if (!html) {
+    return res.status(400).json({ ok: false, error: 'Missing HTML content' });
+  }
+
   let browser;
   try {
     browser = await puppeteer.launch({
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ],
     });
     const page = await browser.newPage();
+    
+    // Set a reasonable timeout for large documents
+    await page.setDefaultNavigationTimeout(60000); 
+    
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdf = await page.pdf({
       format: 'A4',
@@ -53,9 +68,29 @@ app.post('/api/generate-pdf', async (req, res) => {
     });
     res.send(pdf);
   } catch (err) {
+    console.error('PDF Generation Error:', err);
     if (browser) await browser.close();
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(500).json({ ok: false, error: `Puppeteer Error: ${err.message}` });
   }
+});
+
+// ─── Global Error Handler ─────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  
+  // Handle JSON parsing errors or other middleware errors
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ ok: false, error: 'Invalid JSON payload' });
+  }
+  
+  if (err.status === 413) {
+    return res.status(413).json({ ok: false, error: 'Payload too large. Please reduce the size of your logo or document.' });
+  }
+
+  res.status(err.status || 500).json({ 
+    ok: false, 
+    error: err.message || 'Internal Server Error' 
+  });
 });
 
 // ─── Serve frontend ───────────────────────────────────────────────────────────
