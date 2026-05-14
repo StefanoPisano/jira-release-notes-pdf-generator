@@ -214,5 +214,5 @@ function formatBytes(bytes, decimals = 2) {
 
 function setLoading(on) {
   downloadPdfBtn.disabled = on;
-  downloadPdfBtn.querySelector('.btn-label').textContent = on ? 'Generating PDF...' : '⬇ Download PDF';
+  downloadPdfBtn.querySelector('.btn-label').textContent = on ? 'Generating PDF...' : '⬇ PDF';
 }
