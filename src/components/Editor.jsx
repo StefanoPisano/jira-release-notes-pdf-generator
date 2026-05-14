@@ -1,7 +1,9 @@
 import React from 'react';
-import { X } from 'lucide-react';
 
-export default function Editor({ items, onToggleItem }) {
+export default function Editor({ items, onToggleItem, productName, version, logo }) {
+  const title = `Release Notes - ${productName ? productName + ' - ' : ''}${version || 'v1.0.0.0'}`;
+  const currentDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
   if (items.length === 0) {
     return (
       <div className="preview-container">
@@ -12,36 +14,30 @@ export default function Editor({ items, onToggleItem }) {
 
   return (
     <div className="preview-container" role="region" aria-label="Interactive release notes editor">
-      {items.map(item => (
-        <div 
-          key={item.id} 
-          className={`removable-item ${item.deleted ? 'hidden-item' : ''}`}
-          aria-hidden={item.deleted}
-        >
-          {!item.deleted && (
-            <button 
-              className="delete-btn" 
-              onClick={() => onToggleItem(item.id)}
-              aria-label="Remove item"
-            >
-              <X size={12} aria-hidden="true" />
-            </button>
-          )}
-
-          {item.deleted ? (
-            <div 
-              className="deleted-placeholder" 
-              onClick={() => onToggleItem(item.id)}
-              role="button"
-              aria-label="Restore item"
-            >
-              Item removed (Click to restore)
-            </div>
-          ) : (
-            <p dangerouslySetInnerHTML={{ __html: item.content }} />
-          )}
+      <div className="pdf-header-preview">
+        {logo && <img src={logo} className="logo-preview" alt="Logo" />}
+        <div className="header-text-preview">
+          <h1>{title}</h1>
+          <p>Generated on {currentDate}</p>
         </div>
-      ))}
+      </div>
+      <ul className="preview-items">
+        {items.map(item => (
+          <li key={item.id} className={`removable-item ${!item.selected ? 'unselected-item' : ''}`}>
+            <label>
+              <input 
+                type="checkbox" 
+                className="item-checkbox"
+                checked={item.selected} 
+                onChange={() => onToggleItem(item.id)}
+              />
+              <div className="item-content">
+                <div dangerouslySetInnerHTML={{ __html: item.content }} />
+              </div>
+            </label>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -13,7 +13,8 @@ export default function Sidebar({
   onReset, 
   onProcess, 
   isProcessing,
-  showProcessButton
+  showProcessButton,
+  onShowInfo
 }) {
   const logoInputRef = React.useRef(null);
   const fileInputRef = React.useRef(null);
@@ -125,6 +126,13 @@ export default function Sidebar({
       </div>
 
       <div className="sidebar-actions">
+        <button 
+          className="btn-secondary" 
+          type="button"
+          onClick={onShowInfo}
+        >
+          About / How to use
+        </button>
         <button 
           className="btn-primary" 
           disabled={!file || !showProcessButton || isProcessing} 

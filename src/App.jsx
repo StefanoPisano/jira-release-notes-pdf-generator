@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { marked } from 'marked';
-import { FileText, Download, Trash2 } from 'lucide-react';
+import { FileText, Download, Trash2, CheckSquare, Square } from 'lucide-react';
 
 // Components
 import Sidebar from './components/Sidebar';
 import FileDropzone from './components/FileDropzone';
 import Editor from './components/Editor';
+import InfoPage from './components/InfoPage';
 
 // Utilities
 import { formatBytes, generateId } from './utils/helpers';
@@ -20,6 +21,15 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [recentFiles, setRecentFiles] = useState([]);
+  const [view, setView] = useState('app');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('recentFiles');
+    if (saved) {
+      setRecentFiles(JSON.parse(saved));
+    }
+  }, []);
 
   const handleFileSelect = (selectedFile) => {
     const isMd = selectedFile.name.endsWith('.md');
@@ -106,7 +116,7 @@ export default function App() {
         extractedItems.push({
           id: generateId(),
           content: li.innerHTML,
-          deleted: false
+          selected: true
         });
       });
     } else {
@@ -115,19 +125,45 @@ export default function App() {
         extractedItems.push({
           id: generateId(),
           content: p.innerHTML,
-          deleted: false
+          selected: true
         });
       });
     }
 
+    // Sort by ticket number ascending
+    const extractTicketNumber = (content) => {
+      const match = content.match(/(\w+)-(\d+)/);
+      return match ? parseInt(match[2]) : 0;
+    };
+    extractedItems.sort((a, b) => {
+      const numA = extractTicketNumber(a.content);
+      const numB = extractTicketNumber(b.content);
+      return numA - numB;
+    });
+
     setItems(extractedItems);
     setIsProcessing(false);
+
+    // Save to recent files
+    const key = `${productName}-${version}`;
+    setRecentFiles(prev => {
+      const newRecent = prev.filter(r => r.key !== key);
+      newRecent.unshift({ key, state: { file, productName, version, logo, items: extractedItems } });
+      if (newRecent.length > 5) newRecent.pop();
+      localStorage.setItem('recentFiles', JSON.stringify(newRecent));
+      return newRecent;
+    });
   };
 
   const handleToggleItem = (id) => {
     setItems(prevItems => prevItems.map(item => 
-      item.id === id ? { ...item, deleted: !item.deleted } : item
+      item.id === id ? { ...item, selected: !item.selected } : item
     ));
+  };
+
+  const handleToggleAll = () => {
+    const allSelected = items.every(item => item.selected);
+    setItems(prevItems => prevItems.map(item => ({ ...item, selected: !allSelected })));
   };
 
   const handleReset = () => {
@@ -135,7 +171,11 @@ export default function App() {
     setItems([]);
     setProductName('');
     setVersion('');
+    setView('app');
   };
+
+  const handleShowInfo = () => setView('info');
+  const handleBackToApp = () => setView('app');
 
   const handleDownloadPdf = async () => {
     if (items.length === 0) return;
@@ -161,6 +201,22 @@ export default function App() {
     }
   };
 
+  const loadRecent = (state) => {
+    setFile(state.file);
+    setProductName(state.productName);
+    setVersion(state.version);
+    setLogo(state.logo);
+    setItems(state.items);
+  };
+
+  const deleteRecent = (key) => {
+    setRecentFiles(prev => {
+      const newRecent = prev.filter(r => r.key !== key);
+      localStorage.setItem('recentFiles', JSON.stringify(newRecent));
+      return newRecent;
+    });
+  };
+
   return (
     <div className="app-layout">
       <Sidebar 
@@ -176,10 +232,13 @@ export default function App() {
         onProcess={handleProcess}
         isProcessing={isProcessing}
         showProcessButton={items.length === 0}
+        onShowInfo={handleShowInfo}
       />
 
       <main className="main" role="main">
-        {items.length === 0 ? (
+        {view === 'info' ? (
+          <InfoPage onBack={handleBackToApp} />
+        ) : items.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon"><FileText size={64} aria-hidden="true" /></div>
             <h1>Release Notes Creator</h1>
@@ -188,6 +247,18 @@ export default function App() {
                 ? 'Upload a document in the sidebar to start editing your release notes.' 
                 : 'Click "Process Document" in the sidebar to start editing.'}
             </p>
+            {recentFiles.length > 0 && (
+              <div className="recent-files">
+                <h2>Recent Files</h2>
+                {recentFiles.map(r => (
+                  <div key={r.key} className="recent-file">
+                    <span>{r.state.productName} - {r.state.version}</span>
+                    <button onClick={() => loadRecent(r.state)}>Load</button>
+                    <button onClick={() => deleteRecent(r.key)}>Delete</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="content-area">
@@ -197,6 +268,14 @@ export default function App() {
                 <span className="doc-name">{file.name}</span>
               </div>
               <div className="topbar-actions">
+                <button 
+                  className="btn-ghost" 
+                  onClick={handleToggleAll}
+                  aria-label="Toggle all items"
+                >
+                  {items.every(item => item.selected) ? <Square size={16} aria-hidden="true" /> : <CheckSquare size={16} aria-hidden="true" />}
+                  <span className="btn-label">{items.every(item => item.selected) ? 'Uncheck All' : 'Check All'}</span>
+                </button>
                 <button 
                   className="btn-ghost" 
                   onClick={handleReset}
@@ -217,7 +296,7 @@ export default function App() {
             </header>
 
             <section className="preview-wrapper">
-              <Editor items={items} onToggleItem={handleToggleItem} />
+              <Editor items={items} onToggleItem={handleToggleItem} productName={productName} version={version} logo={logo} />
             </section>
           </div>
         )}

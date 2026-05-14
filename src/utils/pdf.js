@@ -3,7 +3,7 @@
  */
 export function buildPdfHtml({ productName, version, items, logo }) {
   const activeItemsHtml = items
-    .filter(item => !item.deleted)
+    .filter(item => item.selected)
     .map(item => `<li>${item.content}</li>`)
     .join('');
 
