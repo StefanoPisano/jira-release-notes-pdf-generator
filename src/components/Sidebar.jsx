@@ -26,22 +26,6 @@ export default function Sidebar({
           <p className="section-desc">Prepare your document for PDF export.</p>
         </div>
 
-        {file && (
-          <div className="file-info" aria-live="polite">
-            <div className="file-details">
-              <span className="file-name">{file.name}</span>
-              <span className="file-size">{file.size}</span>
-            </div>
-            <button 
-              className="btn-icon" 
-              onClick={onReset}
-              aria-label="Remove current file"
-            >
-              <X size={16} aria-hidden="true" />
-            </button>
-          </div>
-        )}
-
         <div className="sidebar-form-fields">
           <div className="field-group">
             <label>Logo</label>
@@ -55,7 +39,7 @@ export default function Sidebar({
                 </div>
               ) : (
                 <button 
-                  className="btn-outline-sm" 
+                  className="btn-outline-sm-full" 
                   onClick={() => logoInputRef.current?.click()}
                 >
                   Upload Logo

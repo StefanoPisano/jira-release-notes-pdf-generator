@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { marked } from 'marked';
-import { FileText, Download, Trash2, CheckSquare, Square } from 'lucide-react';
+import { FileText, Download, Trash2, CheckSquare, Square, Loader2, Circle } from 'lucide-react';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -23,6 +23,8 @@ export default function App() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [recentFiles, setRecentFiles] = useState([]);
   const [view, setView] = useState('app');
+  const [syncStatus, setSyncStatus] = useState('not-synced');
+  const syncTimeoutRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('recentFiles');
@@ -30,6 +32,60 @@ export default function App() {
       setRecentFiles(JSON.parse(saved));
     }
   }, []);
+
+  const saveCurrentRecentState = (currentFile, currentProduct, currentVersion, currentLogo, currentItems) => {
+    if (!currentFile || !currentProduct || !currentVersion || currentItems.length === 0) {
+      setSyncStatus('not-synced');
+      return;
+    }
+
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = null;
+    }
+
+    setSyncStatus('syncing');
+    const key = `${currentProduct}-${currentVersion}`;
+    setRecentFiles(prev => {
+      const newEntry = {
+        key,
+        state: {
+          file: currentFile,
+          productName: currentProduct,
+          version: currentVersion,
+          logo: currentLogo,
+          items: currentItems
+        }
+      };
+
+      const found = prev.find(r => r.key === key);
+      const newRecent = found
+        ? prev.map(r => r.key === key ? newEntry : r)
+        : [newEntry, ...prev];
+
+      if (!found && newRecent.length > 5) {
+        newRecent.pop();
+      }
+
+      localStorage.setItem('recentFiles', JSON.stringify(newRecent));
+
+      syncTimeoutRef.current = window.setTimeout(() => {
+        setSyncStatus('synced');
+        syncTimeoutRef.current = null;
+      }, 500);
+
+      return newRecent;
+    });
+  };
+
+  useEffect(() => {
+    saveCurrentRecentState(file, productName, version, logo, items);
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, [file, productName, version, logo, items]);
 
   const handleFileSelect = (selectedFile) => {
     const isMd = selectedFile.name.endsWith('.md');
@@ -143,16 +199,6 @@ export default function App() {
 
     setItems(extractedItems);
     setIsProcessing(false);
-
-    // Save to recent files
-    const key = `${productName}-${version}`;
-    setRecentFiles(prev => {
-      const newRecent = prev.filter(r => r.key !== key);
-      newRecent.unshift({ key, state: { file, productName, version, logo, items: extractedItems } });
-      if (newRecent.length > 5) newRecent.pop();
-      localStorage.setItem('recentFiles', JSON.stringify(newRecent));
-      return newRecent;
-    });
   };
 
   const handleToggleItem = (id) => {
@@ -171,6 +217,7 @@ export default function App() {
     setItems([]);
     setProductName('');
     setVersion('');
+    setSyncStatus('not-synced');
     setView('app');
   };
 
@@ -207,6 +254,7 @@ export default function App() {
     setVersion(state.version);
     setLogo(state.logo);
     setItems(state.items);
+    setSyncStatus('synced');
   };
 
   const deleteRecent = (key) => {
@@ -238,8 +286,10 @@ export default function App() {
       <main className="main" role="main">
         {view === 'info' ? (
           <InfoPage onBack={handleBackToApp} />
-        ) : items.length === 0 ? (
-          <div className="empty-state">
+        ) : (
+          <>
+            {items.length === 0 ? (
+              <div className="empty-state">
             <div className="empty-icon"><FileText size={64} aria-hidden="true" /></div>
             <h1>Release Notes Creator</h1>
             <p>
@@ -268,6 +318,14 @@ export default function App() {
                 <span className="doc-name">{file.name}</span>
               </div>
               <div className="topbar-actions">
+                <div className={'sync-status ' + syncStatus}>
+                  {syncStatus === 'syncing' ? (
+                    <Loader2 size={16} className="sync-icon" aria-hidden="true" />
+                  ) : syncStatus === 'synced' ? (
+                    <Circle size={12} className="sync-dot" aria-hidden="true" />
+                  ) : null}
+                  <span>{syncStatus === 'synced' ? 'In Sync' : syncStatus === 'Syncing' ? 'Syncing' : 'Not Synced'}</span>
+                </div>
                 <button 
                   className="btn-ghost" 
                   onClick={handleToggleAll}
@@ -300,6 +358,8 @@ export default function App() {
             </section>
           </div>
         )}
+      </>
+      )}
       </main>
     </div>
   );

@@ -27,6 +27,7 @@ export function buildPdfHtml({ productName, version, items, logo }) {
         }
         .pdf-header {
           display: flex;
+          flex-direction: column;
           align-items: center;
           gap: 20px;
           margin-bottom: 30px;
@@ -49,7 +50,8 @@ export function buildPdfHtml({ productName, version, items, logo }) {
           margin: 5px 0 0 0;
         }
         ul {
-          padding-left: 1.2rem;
+          list-style-type: none;
+          padding-left: 0;
           margin-top: 0;
         }
         li {

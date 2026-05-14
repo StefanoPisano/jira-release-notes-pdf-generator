@@ -148,6 +148,24 @@
   border-color: var(--text-muted);
 }
 
+.btn-outline-sm-full {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  width: 100%;
+}
+
+.btn-outline-sm-full:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-muted);
+}
+
 .btn-secondary {
   display: flex;
   align-items: center;
@@ -337,7 +355,7 @@ body {
 }
 
 .form-section-title {
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 4px;
@@ -627,6 +645,49 @@ body {
   gap: 12px;
 }
 
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.sync-status span {
+  text-transform: capitalize;
+}
+
+.sync-status.synced {
+  color: #1f7a3f;
+}
+
+.sync-status.syncing {
+  color: #b36a00;
+}
+
+.sync-status.not-synced {
+  color: #c0392b;
+}
+
+.sync-icon {
+  animation: sync-spin 1s linear infinite;
+}
+
+.sync-dot {
+  animation: pulse 2s infinite;
+  fill: currentColor;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* ─── Preview area ────────────────────────────────────────────────────── */
 .preview-wrapper {
   background: var(--surface);
@@ -685,6 +746,7 @@ body {
 /* ─── PDF Header Preview ───────────────────────────────────────────────── */
 .pdf-header-preview {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 20px;
   margin-bottom: 30px;
