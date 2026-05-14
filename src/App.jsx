@@ -113,6 +113,11 @@ export default function App() {
   };
 
   const handleLogoSelect = (selectedFile) => {
+    if (!selectedFile) {
+      setLogo(null);
+      return;
+    }
+
     if (!selectedFile.type.startsWith('image/')) {
       alert('Please upload an image file for the logo.');
       return;
@@ -120,7 +125,7 @@ export default function App() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      setLogo(e.target.result);
+      setLogo({ src: e.target.result, name: selectedFile.name });
     };
     reader.readAsDataURL(selectedFile);
   };
@@ -223,13 +228,17 @@ export default function App() {
 
   const handleShowInfo = () => setView('info');
   const handleBackToApp = () => setView('app');
+  const handleReturnHome = () => {
+    setItems([]);
+    setView('app');
+  };
 
   const handleDownloadPdf = async () => {
     if (items.length === 0) return;
     setIsGeneratingPdf(true);
 
     try {
-      const html = buildPdfHtml({ productName, version, items, logo });
+      const html = buildPdfHtml({ productName, version, items, logo: logo?.src });
       const filename = `Release Notes - ${productName ? productName + ' - ' : ''}${version || 'Version'}`;
 
       const blob = await generatePdf({ html, filename });
@@ -281,6 +290,7 @@ export default function App() {
         isProcessing={isProcessing}
         showProcessButton={items.length === 0}
         onShowInfo={handleShowInfo}
+        onHomeClick={handleReturnHome}
       />
 
       <main className="main" role="main">
@@ -348,13 +358,19 @@ export default function App() {
                   disabled={isGeneratingPdf}
                 >
                   <Download size={16} aria-hidden="true" /> 
-                  <span className="btn-label">{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
+                  <span className="btn-label">{isGeneratingPdf ? 'Generating...' : 'Download'}</span>
                 </button>
               </div>
             </header>
 
             <section className="preview-wrapper">
-              <Editor items={items} onToggleItem={handleToggleItem} productName={productName} version={version} logo={logo} />
+              <Editor
+                items={items}
+                onToggleItem={handleToggleItem}
+                productName={productName}
+                version={version}
+                logo={logo}
+              />
             </section>
           </div>
         )}

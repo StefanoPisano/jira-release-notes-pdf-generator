@@ -1,6 +1,7 @@
 import React from 'react';
 
 export default function Editor({ items, onToggleItem, productName, version, logo }) {
+  const logoSrc = logo && typeof logo === 'object' ? logo.src : logo;
   const title = `Release Notes - ${productName ? productName + ' - ' : ''}${version || 'v1.0.0.0'}`;
   const currentDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -15,7 +16,7 @@ export default function Editor({ items, onToggleItem, productName, version, logo
   return (
     <div className="preview-container" role="region" aria-label="Interactive release notes editor">
       <div className="pdf-header-preview">
-        {logo && <img src={logo} className="logo-preview" alt="Logo" />}
+        {logoSrc && <img src={logoSrc} className="logo-preview" alt="Logo" />}
         <div className="header-text-preview">
           <h1>{title}</h1>
           <p>Generated on {currentDate}</p>

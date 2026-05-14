@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, HomeIcon } from 'lucide-react';
 
 export default function Sidebar({ 
   file, 
@@ -14,7 +14,8 @@ export default function Sidebar({
   onProcess, 
   isProcessing,
   showProcessButton,
-  onShowInfo
+  onShowInfo,
+  onHomeClick
 }) {
   const logoInputRef = React.useRef(null);
   const fileInputRef = React.useRef(null);
@@ -22,7 +23,9 @@ export default function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-content">
         <div className="sidebar-header">
-          <h1 className="form-section-title">Release Generator</h1>
+          <button type="button" className="sidebar-title-button" onClick={onHomeClick}>
+            <h1 className="form-section-title"><HomeIcon size={18}/> Release Generator</h1>
+          </button>
           <p className="section-desc">Prepare your document for PDF export.</p>
         </div>
 
@@ -30,20 +33,24 @@ export default function Sidebar({
           <div className="field-group">
             <label>Logo</label>
             <div className="logo-upload-wrapper">
-              {logo ? (
-                <div className="logo-preview-container">
-                  <img src={logo} alt="Logo preview" className="logo-preview" />
-                  <button className="btn-remove-logo" onClick={() => onLogoSelect(null)} aria-label="Remove logo">
-                    <X size={12} />
-                  </button>
-                </div>
-              ) : (
+              {!logo ? (
                 <button 
                   className="btn-outline-sm-full" 
                   onClick={() => logoInputRef.current?.click()}
                 >
                   Upload Logo
                 </button>
+              ) : (
+                <div className="file-info-compact" aria-live="polite">
+                  <span className="file-name-compact">{logo.name}</span>
+                  <button 
+                    className="btn-icon-xs" 
+                    onClick={() => onLogoSelect(null)}
+                    aria-label="Remove logo"
+                  >
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                </div>
               )}
               <input 
                 type="file" 
