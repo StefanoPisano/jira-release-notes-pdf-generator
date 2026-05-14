@@ -132,6 +132,31 @@ export default function Sidebar({
           {isProcessing ? 'Processing...' : 'Process Document'}
         </button>
       </div>
+
+      <footer className="sidebar-footer">
+        <div className="footer-content">
+          Built with React & Vite – v1.0.0 – Created by{' '}
+          <a 
+            href="https://stefanopisano.github.io" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            Stefano Pisano
+          </a>{' '}
+          © {new Date().getFullYear()}
+          <br />
+          Licensed under{' '}
+          <a 
+            href="LICENSE" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            GNU General Public License v3.0
+          </a>
+        </div>
+      </footer>
     </aside>
   );
 }
