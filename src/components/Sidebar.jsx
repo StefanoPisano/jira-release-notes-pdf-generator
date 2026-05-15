@@ -27,8 +27,8 @@ export default function Sidebar({
   onHomeClick
 }) {
   return (
-    <aside className="w-80 min-w-80 bg-surface border-r border-border flex flex-col h-screen overflow-hidden">
-      <div className="flex-l overflow-y-auto p-6">
+    <aside className="w-full md:w-80 md:min-w-[320px] bg-surface border-b border-border md:border-b-0 md:border-r flex flex-col h-auto md:h-screen overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-6">
         <div className="mb-6">
           <button type="button" className="w-full text-left cursor-pointer hover:underline sidebar-title-button" onClick={onHomeClick}>
             <h1 className="text-2xl font-bold text-text mb-1 -tracking-widest flex items-center gap-2">

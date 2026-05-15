@@ -133,7 +133,7 @@ export default function App() {
   const handleHomeClick = () => setView('app');
 
   return (
-    <div className="flex w-full h-screen">
+    <div className="flex flex-col md:flex-row w-full min-h-screen">
       <Sidebar
         file={file}
         onFileSelect={handleFileSelectWrapper}
@@ -151,7 +151,7 @@ export default function App() {
         onHomeClick={handleHomeClick}
       />
 
-      <main className="flex-1 h-screen overflow-hidden flex flex-col" role="main">
+      <main className="flex-1 h-auto md:h-screen overflow-hidden flex flex-col" role="main">
         {view === 'info' ? (
           <InfoPage onBack={handleBackToApp} />
         ) : (
