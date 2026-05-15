@@ -5,6 +5,8 @@ Simple web application that, given a markdown file, allows the user to remove el
 
 ## Technology stack
 - Frontend: React
+- Style: Tailwind
+- UI: minimalistic
 - PDF: Puppeteer
 
 ## Workflow

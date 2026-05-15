@@ -1,5 +1,8 @@
+import { formatReleaseTitle, formatGeneratedDate } from './titleFormatter';
+
 /**
- * Generates the HTML for the PDF based on provided items and metadata.
+ * Builds the PDF HTML structure with header, content, and styling.
+ * Filters to include only selected items.
  */
 export function buildPdfHtml({ productName, version, items, logo }) {
   const activeItemsHtml = items
@@ -7,7 +10,7 @@ export function buildPdfHtml({ productName, version, items, logo }) {
     .map(item => `<li>${item.content}</li>`)
     .join('');
 
-  const title = `Release Notes - ${productName ? productName + ' - ' : ''}${version || 'v1.0.0.0'}`;
+  const title = formatReleaseTitle(productName, version);
 
   return `
     <!DOCTYPE html>
@@ -71,7 +74,7 @@ export function buildPdfHtml({ productName, version, items, logo }) {
         ${logo ? `<img src="${logo}" class="logo" alt="Logo" />` : ''}
         <div class="header-text">
           <h1>${title}</h1>
-          <p>Generated on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <p>Generated on ${formatGeneratedDate()}</p>
         </div>
       </div>
       <main>

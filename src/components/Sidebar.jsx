@@ -1,162 +1,71 @@
 import React from 'react';
-import { X, HomeIcon } from 'lucide-react';
+import { HomeIcon } from 'lucide-react';
+import { LogoField } from './FormFields/LogoField';
+import { MetadataFields } from './FormFields/MetadataFields';
+import { DocumentField } from './FormFields/DocumentField';
+import { SidebarActions } from './SidebarActions';
+import { SidebarFooter } from './SidebarFooter';
 
-export default function Sidebar({ 
-  file, 
+/**
+ * Sidebar component for document input and configuration.
+ * Displays form fields for logo, product name, version, and document upload.
+ */
+export default function Sidebar({
+  file,
   onFileSelect,
   logo,
   onLogoSelect,
-  productName, 
-  setProductName, 
-  version, 
-  setVersion, 
-  onReset, 
-  onProcess, 
+  productName,
+  setProductName,
+  version,
+  setVersion,
+  onReset,
+  onProcess,
   isProcessing,
   showProcessButton,
   onShowInfo,
   onHomeClick
 }) {
-  const logoInputRef = React.useRef(null);
-  const fileInputRef = React.useRef(null);
   return (
-    <aside className="sidebar">
-      <div className="sidebar-content">
-        <div className="sidebar-header">
-          <button type="button" className="sidebar-title-button" onClick={onHomeClick}>
-            <h1 className="form-section-title"><HomeIcon size={18}/> Release Generator</h1>
+    <aside className="w-80 min-w-80 bg-surface border-r border-border flex flex-col h-screen overflow-hidden">
+      <div className="flex-l overflow-y-auto p-6">
+        <div className="mb-6">
+          <button type="button" className="w-full text-left cursor-pointer hover:underline sidebar-title-button" onClick={onHomeClick}>
+            <h1 className="text-2xl font-bold text-text mb-1 -tracking-widest flex items-center gap-2">
+              <HomeIcon size={18} /> Release Generator
+            </h1>
           </button>
-          <p className="section-desc">Prepare your document for PDF export.</p>
+          <p className="text-sm text-text-muted leading-6">
+            Prepare your document for PDF export.
+          </p>
         </div>
 
-        <div className="sidebar-form-fields">
-          <div className="field-group">
-            <label>Logo</label>
-            <div className="logo-upload-wrapper">
-              {!logo ? (
-                <button 
-                  className="btn-outline-sm-full" 
-                  onClick={() => logoInputRef.current?.click()}
-                >
-                  Upload Logo
-                </button>
-              ) : (
-                <div className="file-info-compact" aria-live="polite">
-                  <span className="file-name-compact">{logo.name}</span>
-                  <button 
-                    className="btn-icon-xs" 
-                    onClick={() => onLogoSelect(null)}
-                    aria-label="Remove logo"
-                  >
-                    <X size={14} aria-hidden="true" />
-                  </button>
-                </div>
-              )}
-              <input 
-                type="file" 
-                ref={logoInputRef} 
-                onChange={(e) => e.target.files[0] && onLogoSelect(e.target.files[0])} 
-                accept="image/*" 
-                hidden 
-              />
-            </div>
-          </div>
+        <div className="mt-6 flex flex-col gap-4">
+          <LogoField logo={logo} onLogoSelect={onLogoSelect} />
 
-          <div className="field-group">
-            <label htmlFor="productName">Product Name</label>
-            <input 
-              id="productName"
-              type="text" 
-              placeholder="e.g. My App"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-          </div>
-          
-          <div className="field-group">
-            <label htmlFor="version">Version</label>
-            <input 
-              id="version"
-              type="text" 
-              placeholder="e.g. 1.2.3.4"
-              value={version}
-              onChange={(e) => setVersion(e.target.value)}
-            />
-          </div>
+          <MetadataFields
+            productName={productName}
+            setProductName={setProductName}
+            version={version}
+            setVersion={setVersion}
+          />
 
-          <div className="field-group">
-            <label>Document (.md)</label>
-            {!file ? (
-              <button 
-                className="btn-outline-sm" 
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Upload Markdown
-              </button>
-            ) : (
-              <div className="file-info-compact" aria-live="polite">
-                <span className="file-name-compact">{file.name}</span>
-                <button 
-                  className="btn-icon-xs" 
-                  onClick={onReset}
-                  aria-label="Remove current file"
-                >
-                  <X size={14} aria-hidden="true" />
-                </button>
-              </div>
-            )}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={(e) => e.target.files[0] && onFileSelect(e.target.files[0])} 
-              accept=".md" 
-              hidden 
-            />
-          </div>
+          <DocumentField
+            file={file}
+            onFileSelect={onFileSelect}
+            onReset={onReset}
+          />
         </div>
       </div>
 
-      <div className="sidebar-actions">
-        <button 
-          className="btn-secondary" 
-          type="button"
-          onClick={onShowInfo}
-        >
-          About / How to use
-        </button>
-        <button 
-          className="btn-primary" 
-          disabled={!file || !showProcessButton || isProcessing} 
-          onClick={onProcess}
-        >
-          {isProcessing ? 'Processing...' : 'Process Document'}
-        </button>
-      </div>
+      <SidebarActions
+        showProcessButton={showProcessButton}
+        isProcessing={isProcessing}
+        onProcess={onProcess}
+        onShowInfo={onShowInfo}
+      />
 
-      <footer className="sidebar-footer">
-        <div className="footer-content">
-          Built with React & Vite – v1.0.0 – Created by{' '}
-          <a 
-            href="https://stefanopisano.github.io" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            Stefano Pisano
-          </a>{' '}
-          © {new Date().getFullYear()}
-          <br />
-          Licensed under{' '}
-          <a 
-            href="LICENSE" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            GNU General Public License v3.0
-          </a>
-        </div>
-      </footer>
+      <SidebarFooter />
     </aside>
   );
 }

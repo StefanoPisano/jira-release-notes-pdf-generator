@@ -7,3 +7,4 @@
 - Avoid unnecessary comments, put them only if the logic is too complex.
 - Avoid nested if statements, use guard clauses instead.
 - All inputs to upload logo, document, version and product name should be placed in the sidebar.
+- Because of single responsibility principle, multiple components, css and scripts should be created, each one of them will have the responsibility to manage a particular part of the application
