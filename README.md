@@ -39,3 +39,6 @@ npm run dev:all
 4. Click **Process Document**.
 5. Use the trash icons to remove any tickets you don't want in the final PDF.
 6. Click **Download PDF** to export.
+
+## 💡 AI Experimentation
+This project was developed as an experiment in AI-assisted coding and context prompt engineering. The entire codebase, including logic and styling, was built by an AI agent (Antigravity) collaborating with a human user, demonstrating the power of highly contextualized prompts and agentic workflows in software development. This is part of a series of experiments to test the capabilities of AI in software development.
