@@ -8,8 +8,8 @@ The goal of this project is to provide a simple web application that allows user
 
 ## Technology Stack
 - **Frontend**: React (Vite)
-- **Backend**: Node.js/Express
-- **PDF Generation**: Puppeteer
+- **Backend**: Node.js/Express (optional for local development)
+- **PDF Generation**: Client-side browser export using jsPDF + html2canvas
 - **Icons**: Lucide React
 - **Markdown Parsing**: Marked
 
@@ -31,6 +31,8 @@ npm run dev:all
 ```
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:3333`
+
+> For GitHub Pages deployment, the PDF export runs entirely in the browser, so the static `dist/` build works without the backend.
 
 ### 3. Usage
 1. Open the application in your browser.

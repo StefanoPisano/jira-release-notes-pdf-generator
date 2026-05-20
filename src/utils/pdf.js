@@ -1,4 +1,6 @@
 import { formatReleaseTitle, formatGeneratedDate } from './titleFormatter';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 /**
  * Builds the PDF HTML structure with header, content, and styling.
@@ -87,37 +89,51 @@ export function buildPdfHtml({ productName, version, items, logo }) {
   `;
 }
 
-export async function generatePdf(payload) {
-  const res = await fetch('/api/generate-pdf', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+export async function generatePdf({ html, filename }) {
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.top = '0';
+  wrapper.style.left = '-10000px';
+  wrapper.style.width = '190mm';
+  wrapper.style.boxSizing = 'border-box';
+  wrapper.style.opacity = '0';
+  wrapper.style.pointerEvents = 'none';
+  wrapper.style.zIndex = '-9999';
+  wrapper.innerHTML = html;
+  document.body.appendChild(wrapper);
 
-  if (!res.ok) {
-    const contentType = res.headers.get('content-type');
-    let errorMessage = 'PDF Generation failed';
+  try {
+    const content = wrapper.querySelector('body') || wrapper;
+    const canvas = await html2canvas(content, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
 
-    if (contentType && contentType.includes('application/json')) {
-      try {
-        const errorData = await res.json();
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // Fallback if JSON parsing still fails
-        errorMessage = `Server returned ${res.status}: ${res.statusText}`;
-      }
-    } else {
-      // Handle non-JSON error (like HTML from Express or proxy)
-      const text = await res.text();
-      if (res.status === 413) {
-        errorMessage = 'Document is too large for the server to process. Try reducing the logo size or content.';
-      } else {
-        errorMessage = `Server Error (${res.status}): ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}`;
-      }
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pdfWidth;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+    heightLeft -= pdfHeight;
+
+    while (heightLeft > 0) {
+      position -= pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      heightLeft -= pdfHeight;
     }
 
-    throw new Error(errorMessage);
+    return pdf.output('blob');
+  } finally {
+    document.body.removeChild(wrapper);
   }
-
-  return res.blob();
 }
